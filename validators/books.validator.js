@@ -1,7 +1,7 @@
 const Joi = require ("joi");
 const getCurrentYear = require ("./currentyear")
 
-const bookSchema = Joi.object({
+const bookAddSchema = Joi.object({
     title: Joi.string()
         .min(5)
         .max(255)
@@ -32,17 +32,63 @@ const bookSchema = Joi.object({
     .default(Date.now),
 })
 
-async function BookValidationMw(req, res, next){
+const bookUpdateSchema = Joi.object({
+    title: Joi.string()
+        .min(5)
+        .max(255)
+        .trim(),
+    shortDescription: Joi.string()
+        .min(5)
+        .max(360)
+        .trim(),
+    longDescription: Joi.string()
+        .min(10)
+        .trim(),
+    year: Joi.number()
+        .integer()
+        .required()
+        .max(getCurrentYear.getCurrentYear()),
+    isbn: Joi.number()
+        .integer()
+        .required(),
+    price: Joi.number()
+        .min(0)
+        .required(),
+    cretedAt: Joi.date()
+        .default(Date.now),
+    updatedAt: Joi.date()
+    .default(Date.now),
+})
+
+async function AddBookValidationMw(req, res, next){
     const bookPayLoad = req.body
 
     try{
-        await bookSchema.validateAsync(bookPayLoad)
+        await bookAddSchema.validateAsync(bookPayLoad)
         next()
     } catch (error) {
-        next(error)
+        next({
+            message: error.details(0).message,
+            status: 406
+    })
+    }
+}
+
+async function UpdateBookValidationMw(req, res, next){
+    const bookPayLoad = req.body
+
+    try{
+        await bookUpdateSchema.validateAsync(bookPayLoad)
+        next()
+    } catch (error) {
+        next({
+            message: error.details(0).message,
+            status: 406
+    })
     }
 }
 
 module.exports = {
-    BookValidationMw
+    AddBookValidationMw,
+    UpdateBookValidationMw
 }
