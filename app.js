@@ -3,7 +3,8 @@ const bodyParser = require ("body-parser")
 const CONFIG = require ("./config/config")
 
 //Routes
-const bookRouter = require("./routes/books")
+const bookRouter = require("./routes/books.route")
+const authorRouter = require("./routes/authors.route")
 
 const connectMongodb = require ("./db/mongodb")
 
@@ -17,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.use("/api/v1/books", bookRouter)
+app.use("/api/v1/authors", authorRouter)
 
 app.get ("/", (req, res) => {
     res.send("Hello Bookstore")

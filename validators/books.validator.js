@@ -46,11 +46,9 @@ const bookUpdateSchema = Joi.object({
         .trim(),
     year: Joi.number()
         .integer()
-        .required()
         .max(getCurrentYear.getCurrentYear()),
     isbn: Joi.number()
-        .integer()
-        .required(),
+        .integer(),
     price: Joi.number()
         .min(0)
         .required(),
@@ -60,7 +58,7 @@ const bookUpdateSchema = Joi.object({
     .default(Date.now),
 })
 
-async function AddBookValidationMw(req, res, next){
+async function AddBookValidationMw (req, res, next) {
     const bookPayLoad = req.body
 
     try{
@@ -74,15 +72,14 @@ async function AddBookValidationMw(req, res, next){
     }
 }
 
-async function UpdateBookValidationMw(req, res, next){
+async function UpdateBookValidationMw(req, res, next) {
     const bookPayLoad = req.body
-
     try{
         await bookUpdateSchema.validateAsync(bookPayLoad)
         next()
     } catch (error) {
         next({
-            message: error.details(0).message,
+            message: error,
             status: 406
     })
     }
