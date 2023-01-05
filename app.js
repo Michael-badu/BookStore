@@ -2,6 +2,9 @@ const express = require ("express")
 const bodyParser = require ("body-parser")
 const rateLimit = require("express-rate-limit")
 const helmet = require('helmet')
+const {requiresAuth} = require('express-openid-connect')
+const auth0Middleware = require("./auth/auth0")
+
 const CONFIG = require ("./config/config")
 
 //Routes
@@ -15,9 +18,13 @@ const app = express()
 //connect to Mongodb Database
 connectMongodb()
 
+
 //Add middleware
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+
+// auth router attaches /login, /logout, and /callback routes to the baseURL
+app.use(auth0Middleware);
 
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
@@ -32,8 +39,8 @@ app.use(limiter)
 //Security Middleware
 app.use(helmet())
 
-app.use("/api/v1/books", bookRouter)
-app.use("/api/v1/authors", authorRouter)
+app.use("/api/v1/books", requiresAuth(), bookRouter)
+app.use("/api/v1/authors", requiresAuth(), authorRouter)
 
 app.get ("/", (req, res) => {
     res.send("Hello Bookstore")
